@@ -101,7 +101,7 @@ def metrics():
 # TYPE bayleaves counter
 """
     for target, count in counters_200.items():
-        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}\n"
+        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=\"200\"}} {count}\n"
     for target, count in counters_500.items():
-        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}\n"
+        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=\"500\"}} {count}\n"
     return result
