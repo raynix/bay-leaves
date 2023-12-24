@@ -31,7 +31,7 @@ spec:
             - -c
             - |
               pip install -r requirements.txt
-              exec gunicorn -b 0.0.0.0:8000 --log-level debug app:app
+              exec gunicorn -b 0.0.0.0:8000 app:app
           ports:
             - name: web
               containerPort: 8000

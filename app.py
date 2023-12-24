@@ -35,13 +35,14 @@ def launch_proxyium(driver, url):
     url_input.send_keys(url)
     send = driver.find_element(By.XPATH, '//*[@id="unique-btn-blue"]')
     send.click()
+    sleep(10)
 
 def random_scroll(driver):
     height = 0
     for _ in range(0, random.randint(2, 5)):
         height += random.randint(500, 1000)
         driver.execute_script(f"window.scrollTo(0, {height});")
-        sleep(5)
+        sleep(10)
 
 def crawl():
     driver = get_driver()
