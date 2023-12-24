@@ -98,9 +98,10 @@ def health():
 def metrics():
     result = """
 # HELP bayleaves Number of http responses done by bay-leaves
-# TYPE bayleaves counter"""
+# TYPE bayleaves counter
+"""
     for target, count in counters_200.items():
-        result += f"\nbayleaves{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}"
+        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}\n"
     for target, count in counters_500.items():
-        result += f"\nbayleaves{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}"
+        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}\n"
     return result
