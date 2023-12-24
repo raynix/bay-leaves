@@ -5,6 +5,7 @@ metadata:
   name: bay-leaves
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: bay-leaves
