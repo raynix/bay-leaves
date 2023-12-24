@@ -11,9 +11,22 @@ from flask import Flask
 from flask_apscheduler import APScheduler
 
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 SELENIUM_HUB_URL = environ.get('SELENIUM_HUB_URL', 'localhost')
 TARGETS = environ.get('TARGETS', 'https://www.google.com.au').split(',')
+
+"""
+counters = {
+    'https://www.google.com.au': 1
+}
+"""
+counters_200 = {}
+counters_500 = {}
+
 
 def get_driver():
     return webdriver.Remote(
@@ -45,11 +58,16 @@ def random_scroll(driver):
         sleep(10)
 
 def crawl():
+    global counters_200, counters_500
     driver = get_driver()
     try:
         for target in TARGETS:
             launch_proxyium(driver, target)
             random_scroll(driver)
+            counters_200[target] = counters_200.get(target, 0) + 1
+    except Exception as e:
+        logger.error(e)
+        counters_500[target] = counters_500.get(target, 0) + 1
     finally:
         driver.quit()
 
@@ -75,3 +93,14 @@ scheduler.start()
 @app.route('/health')
 def health():
     return 'OK'
+
+@app.route('/metrics')
+def metrics():
+    result = """
+# HELP bayleaves Number of http responses done by bay-leaves
+# TYPE bayleaves counter"""
+    for target, count in counters_200.items():
+        result += f"\nhttp{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}"
+    for target, count in counters_500.items():
+        result += f"\nhttp{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}"
+    return result
