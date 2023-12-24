@@ -100,7 +100,7 @@ def metrics():
 # HELP bayleaves Number of http responses done by bay-leaves
 # TYPE bayleaves counter"""
     for target, count in counters_200.items():
-        result += f"\nhttp{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}"
+        result += f"\nbayleaves{{url=\"{target}\", proxy=\"proxyium\", status=200}} {count}"
     for target, count in counters_500.items():
-        result += f"\nhttp{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}"
+        result += f"\nbayleaves{{url=\"{target}\", proxy=\"proxyium\", status=500}} {count}"
     return result
