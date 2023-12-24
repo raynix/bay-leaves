@@ -24,9 +24,7 @@ counters = {
     'https://www.google.com.au': 1
 }
 """
-counters_200 = {}
-counters_500 = {}
-
+counters = {}
 
 def get_driver():
     return webdriver.Remote(
@@ -50,6 +48,25 @@ def launch_proxyium(driver, url):
     send.click()
     sleep(10)
 
+def launch_direct(driver, url):
+    driver.get(url)
+    sleep(10)
+
+def launch(driver, url):
+
+    global counters
+    channels = [launch_proxyium, launch_direct]
+    chosen_channel = random.choice(channels)
+    key = f"{url}:::{chosen_channel.__name__}"
+    try:
+        chosen_channel(driver, url)
+        key_200 = f"{key}:::200"
+        counters[key_200] = counters.get(key_200, 0) + 1
+    except Exception as e:
+        logger.error(e)
+        key_500 = f"{key}:::500"
+        counters[key_500] = counters.get(key_200, 0) + 1
+
 def random_scroll(driver):
     height = 0
     for _ in range(0, random.randint(2, 5)):
@@ -62,12 +79,8 @@ def crawl():
     driver = get_driver()
     try:
         for target in TARGETS:
-            launch_proxyium(driver, target)
+            launch(driver, target)
             random_scroll(driver)
-            counters_200[target] = counters_200.get(target, 0) + 1
-    except Exception as e:
-        logger.error(e)
-        counters_500[target] = counters_500.get(target, 0) + 1
     finally:
         driver.quit()
 
@@ -78,7 +91,7 @@ class Config(object):
             'func': 'app:crawl',
             'args': (),
             'trigger': 'interval',
-            'seconds': 400
+            'seconds': 200
         }
     ]
 
@@ -100,8 +113,6 @@ def metrics():
 # HELP bayleaves Number of http responses done by bay-leaves
 # TYPE bayleaves counter
 """
-    for target, count in counters_200.items():
-        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=\"200\"}} {count}\n"
-    for target, count in counters_500.items():
-        result += f"bayleaves{{url=\"{target}\", proxy=\"proxyium\", status=\"500\"}} {count}\n"
+    for k, v in counters.items():
+        result += "bayleaves{{url=\"{}\", proxy=\"{}\", status=\"{}\"}} {}\n".format(*k.split(":::"), v)
     return result
