@@ -31,9 +31,9 @@ def launch_proxyium(driver, url):
     option = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, '/html/body/main/div/div/div[2]/div/form/div[1]/div/ul/li[3]')))
     option.click()
 
-    url_input = driver.find_element(By.XPATH, '//*[@id="unique-form-control"]')
+    url_input = driver.find_element(By.ID, 'unique-form-control')
     url_input.send_keys(url)
-    send = driver.find_element(By.XPATH, '//*[@id="unique-btn-blue"]')
+    send = driver.find_element(By.ID, 'unique-btn-blue')
     send.click()
     sleep(10)
 
