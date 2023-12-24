@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bay-leaves
+configMapGenerator:
+  - name: bay-leaves-source
+    files:
+      - app.py
+  - name: bay-leaves-requirements
+    files:
+      - requirements.txt
+
+resources:
+  - ns.yaml
+  - deploy.yaml
+  - secret.yaml

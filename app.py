@@ -10,13 +10,15 @@ from time import sleep
 from flask import Flask
 from flask_apscheduler import APScheduler
 
-SELENIUM_HUB_URL = environ.get('SELENIUM_HUB_URL', 'http://localhost:4444/wd/hub')
+import random
+
+SELENIUM_HUB_URL = environ.get('SELENIUM_HUB_URL', 'localhost')
 TARGETS = environ.get('TARGETS', 'https://www.google.com.au').split(',')
 
 def get_driver():
     return webdriver.Remote(
-        command_executor=SELENIUM_HUB_URL,
-        options=webdriver.FirefoxOptions()
+        command_executor=f"http://{SELENIUM_HUB_URL}:4444/wd/hub",
+        options=webdriver.FirefoxOptions(),
     )
 
 def launch_proxyium(driver, url):
@@ -33,14 +35,20 @@ def launch_proxyium(driver, url):
     url_input.send_keys(url)
     send = driver.find_element(By.XPATH, '//*[@id="unique-btn-blue"]')
     send.click()
-    sleep(30)
+
+def random_scroll(driver):
+    height = 0
+    for _ in range(0, random.randint(2, 5)):
+        height += random.randint(500, 1000)
+        driver.execute_script(f"window.scrollTo(0, {height});")
+        sleep(5)
 
 def crawl():
     driver = get_driver()
     try:
         for target in TARGETS:
             launch_proxyium(driver, target)
-            sleep(5)
+            random_scroll(driver)
     finally:
         driver.quit()
 
@@ -51,17 +59,18 @@ class Config(object):
             'func': 'app:crawl',
             'args': (),
             'trigger': 'interval',
-            'seconds': 10
+            'seconds': 400
         }
     ]
 
-if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config.from_object(Config())
+app = Flask(__name__)
+app.config.from_object(Config())
 
-    scheduler = APScheduler()
-    scheduler.api_enabled = True
-    scheduler.init_app(app)
-    scheduler.start()
+scheduler = APScheduler()
+scheduler.api_enabled = True
+scheduler.init_app(app)
+scheduler.start()
 
-    app.run()
+@app.route('/health')
+def health():
+    return 'OK'

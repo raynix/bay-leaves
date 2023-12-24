@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bay-leaves
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bay-leaves
+  template:
+    metadata:
+      labels:
+        app: bay-leaves
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+        - name: app
+          image: python:3-slim
+          workingDir: /opt/bay-leaves
+          command:
+            - bash
+            - -c
+            - |
+              pip install -r requirements.txt
+              exec gunicorn -b 0.0.0.0:8000 --log-level debug app:app
+          ports:
+            - name: web
+              containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: bay-leaves
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 100m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: web
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: web
+          volumeMounts:
+            - name: source
+              mountPath: /opt/bay-leaves/app.py
+              subPath: app.py
+            - name: requirements
+              mountPath: /opt/bay-leaves/requirements.txt
+              subPath: requirements.txt
+      volumes:
+        - name: source
+          configMap:
+            name: bay-leaves-source
+        - name: requirements
+          configMap:
+            name: bay-leaves-requirements
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bay-leaves
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: bay-leaves
