@@ -21,7 +21,7 @@ TARGETS = environ.get('TARGETS', 'https://www.google.com.au').split(',')
 
 """
 counters = {
-    'https://www.google.com.au': 1
+    'https://www.google.com.au:::proxy-name:::200': 1
 }
 """
 counters = {}
@@ -48,6 +48,19 @@ def launch_proxyium(driver, url):
     send.click()
     sleep(10)
 
+def launch_bypass(driver, url):
+    driver.get('https://bypasszone.net/')
+    sleep(10)
+    select = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'unique-nice-select')))
+    select.click()
+    option = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, '/html/body/main/div/div/div[2]/div/form/div[1]/div/ul/li[2]')))
+    option.click()
+    url_input = driver.find_element(By.ID, 'unique-form-control')
+    url_input.send_keys(url)
+    send = driver.find_element(By.ID, 'unique-btn-blue')
+    send.click()
+    sleep(10)
+
 def launch_direct(driver, url):
     driver.get(url)
     sleep(10)
@@ -55,7 +68,7 @@ def launch_direct(driver, url):
 def launch(driver, url):
 
     global counters
-    channels = [launch_proxyium, launch_direct]
+    channels = [launch_bypass, launch_proxyium, launch_direct]
     chosen_channel = random.choice(channels)
     key = f"{url}:::{chosen_channel.__name__}"
     try:
@@ -72,7 +85,7 @@ def random_scroll(driver):
     for _ in range(0, random.randint(2, 5)):
         height += random.randint(500, 1000)
         driver.execute_script(f"window.scrollTo(0, {height});")
-        sleep(10)
+        sleep(random.randint(1, 5))
 
 def crawl():
     global counters_200, counters_500
@@ -91,7 +104,7 @@ class Config(object):
             'func': 'app:crawl',
             'args': (),
             'trigger': 'interval',
-            'seconds': 200
+            'seconds': 120
         }
     ]
 
