@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 SELENIUM_HUB_URL = environ.get('SELENIUM_HUB_URL', 'localhost')
 TARGETS = environ.get('TARGETS', 'https://www.google.com.au').split(',')
+INTERVAL = int(environ.get('INTERVAL', 400))
 
 """
 counters = {
@@ -104,7 +105,7 @@ class Config(object):
             'func': 'app:crawl',
             'args': (),
             'trigger': 'interval',
-            'seconds': 120
+            'seconds': INTERVAL
         }
     ]
 
