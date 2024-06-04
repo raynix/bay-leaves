@@ -69,7 +69,7 @@ def launch_direct(driver, url):
 def launch(driver, url):
 
     global counters
-    channels = [launch_bypass, launch_proxyium, launch_direct]
+    channels = [launch_direct]
     chosen_channel = random.choice(channels)
     key = f"{url}:::{chosen_channel.__name__}"
     try:
