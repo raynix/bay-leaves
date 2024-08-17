@@ -39,6 +39,9 @@ spec:
           envFrom:
             - secretRef:
                 name: bay-leaves
+          env:
+            - name: INTERVAL
+              value: 1800
           resources:
             requests:
               memory: 200Mi
