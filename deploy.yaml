@@ -41,7 +41,7 @@ spec:
                 name: bay-leaves
           env:
             - name: INTERVAL
-              value: "1800"
+              value: "3000"
           resources:
             requests:
               memory: 200Mi
